@@ -1,0 +1,32 @@
+# Optional: match MIDI port by name substring
+# Omit to use the first available port.
+# port = "Arturia"
+
+# Note On mappings
+[[map]]
+note = 60        # C4
+keys = "cmd+c"
+
+[[map]]
+note = 61        # C#4
+keys = "cmd+v"
+
+[[map]]
+note = 62        # D4
+keys = "cmd+z"
+
+[[map]]
+note = 64        # E4
+keys = "f5"
+
+# CC mapping — sustain pedal (CC 64) triggers space
+[[map]]
+cc = 64
+min_value = 64   # pedal pressed (value >= 64)
+keys = "space"
+
+# Channel-specific mapping (channel 2 only)
+# [[map]]
+# note = 60
+# channel = 2
+# keys = "cmd+shift+c"

@@ -1,0 +1,15 @@
+[package]
+name = "midimap"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "midimap"
+path = "src/main.rs"
+
+[dependencies]
+midir = "0.9"
+enigo = "0.2"
+serde = { version = "1", features = ["derive"] }
+toml = "0.8"
+clap = { version = "4", features = ["derive"] }
