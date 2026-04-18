@@ -2,13 +2,15 @@
 
 Map MIDI events (notes, CC) to keyboard shortcuts on macOS.
 
-Inspired by [midistroke](https://github.com/charlieroberts/midiStroke/), rewritten in Rust with active dependencies.
+Inspired by [midistroke](https://github.com/charlieroberts/midiStroke/),
+rewritten in Rust with active dependencies.
 
 ## Requirements
 
 - macOS
 - Rust (install via [rustup](https://rustup.rs))
-- **Accessibility permission** — System Settings → Privacy & Security → Accessibility → enable your terminal or the midimap binary
+- **Accessibility permission** — System Settings → Privacy & Security →
+  Accessibility → enable your terminal or the midimap binary
 
 ## Install
 
@@ -61,18 +63,18 @@ keys = "cmd+shift+c"
 
 Modifiers and keys are joined with `+`:
 
-| Token | Key |
-|---|---|
-| `cmd` / `meta` | ⌘ Command |
-| `ctrl` / `control` | ⌃ Control |
-| `alt` / `option` | ⌥ Option |
-| `shift` | ⇧ Shift |
-| `f1`–`f12` | Function keys |
-| `return` / `enter` | Return |
-| `space`, `tab`, `esc` | Special keys |
-| `up`, `down`, `left`, `right` | Arrow keys |
-| `home`, `end`, `pageup`, `pagedown` | Navigation |
-| any single character | `a`–`z`, `0`–`9`, etc. |
+| Token                               | Key                    |
+| ----------------------------------- | ---------------------- |
+| `cmd` / `meta`                      | ⌘ Command              |
+| `ctrl` / `control`                  | ⌃ Control              |
+| `alt` / `option`                    | ⌥ Option               |
+| `shift`                             | ⇧ Shift                |
+| `f1`–`f12`                          | Function keys          |
+| `return` / `enter`                  | Return                 |
+| `space`, `tab`, `esc`               | Special keys           |
+| `up`, `down`, `left`, `right`       | Arrow keys             |
+| `home`, `end`, `pageup`, `pagedown` | Navigation             |
+| any single character                | `a`–`z`, `0`–`9`, etc. |
 
 ## License
 
