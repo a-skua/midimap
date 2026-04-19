@@ -73,8 +73,8 @@ fn cmd_run(config_path: &str) -> Result<(), Box<dyn std::error::Error>> {
         .mappings
         .into_iter()
         .map(|m| {
-            let keys = parse_combo(&m.keys)
-                .map_err(|e| format!("Invalid keys '{}': {}", m.keys, e))?;
+            let keys =
+                parse_combo(&m.keys).map_err(|e| format!("Invalid keys '{}': {}", m.keys, e))?;
             let note = match &m.note {
                 Some(s) => Some(parse_note(s).map_err(|e| format!("Invalid note: {}", e))?),
                 None => None,
@@ -132,7 +132,10 @@ fn cmd_run(config_path: &str) -> Result<(), Box<dyn std::error::Error>> {
             match status {
                 // Note On with non-zero velocity
                 0x90 if msg.len() >= 3 && msg[2] > 0 => {
-                    let _ = tx.send(MidiEvent::NoteOn { channel, note: msg[1] });
+                    let _ = tx.send(MidiEvent::NoteOn {
+                        channel,
+                        note: msg[1],
+                    });
                 }
                 // Control Change
                 0xB0 if msg.len() >= 3 => {

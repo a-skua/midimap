@@ -23,10 +23,10 @@ pub struct MappingConfig {
 
 impl Config {
     pub fn load(path: &str) -> Result<Self, Box<dyn std::error::Error>> {
-        let content = fs::read_to_string(path)
-            .map_err(|e| format!("Cannot read '{}': {}", path, e))?;
-        let config: Config = toml::from_str(&content)
-            .map_err(|e| format!("Invalid config: {}", e))?;
+        let content =
+            fs::read_to_string(path).map_err(|e| format!("Cannot read '{}': {}", path, e))?;
+        let config: Config =
+            toml::from_str(&content).map_err(|e| format!("Invalid config: {}", e))?;
         Ok(config)
     }
 }
