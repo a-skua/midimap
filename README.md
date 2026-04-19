@@ -37,13 +37,13 @@ Copy `example.toml` to `midimap.toml` and edit:
 # Optional: match port by name substring (uses first port if omitted)
 port = "Arturia"
 
-# Note On → key combo
+# Note On → key combo (LilyPond-style note names, scientific octave)
 [[map]]
-note = 60      # C4
+note = "c4"    # middle C (MIDI 60)
 keys = "cmd+c"
 
 [[map]]
-note = 61      # C#4
+note = "cis4"  # C#4
 keys = "cmd+v"
 
 # CC → key (with optional value threshold)
@@ -54,10 +54,24 @@ keys = "space"
 
 # Channel-specific (1–16; omit to match any channel)
 [[map]]
-note = 60
+note = "c4"
 channel = 2
 keys = "cmd+shift+c"
 ```
+
+### Note name syntax
+
+Notes follow [LilyPond](https://lilypond.org/)-style spelling with a
+scientific-pitch octave number (`c4` = middle C = MIDI 60).
+
+| Form      | Meaning        | Example              |
+| --------- | -------------- | -------------------- |
+| `c`–`b`   | Natural        | `c4` → 60, `a4` → 69 |
+| `…is`     | Sharp (♯)      | `cis4` → 61          |
+| `…es`     | Flat (♭)       | `ees4` → 63          |
+| `…isis`   | Double sharp   | `cisis4` → 62        |
+| `…eses`   | Double flat    | `deses4` → 60        |
+| `…<n>`    | Octave (any ℤ) | `c-1` → 0            |
 
 ### Key syntax
 

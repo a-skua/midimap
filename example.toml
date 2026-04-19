@@ -2,31 +2,33 @@
 # Omit to use the first available port.
 # port = "Arturia"
 
-# Note On mappings
+# Note On mappings — note names use LilyPond-style spelling
+# (sharp = "is", flat = "es") with scientific octave numbers
+# (c4 = middle C = MIDI 60).
 [[map]]
-note = 60        # C4
+note = "c4"
 keys = "cmd+c"
 
 [[map]]
-note = 61        # C#4
+note = "cis4"      # C#4
 keys = "cmd+v"
 
 [[map]]
-note = 62        # D4
+note = "d4"
 keys = "cmd+z"
 
 [[map]]
-note = 64        # E4
+note = "e4"
 keys = "f5"
 
 # CC mapping — sustain pedal (CC 64) triggers space
 [[map]]
 cc = 64
-min_value = 64   # pedal pressed (value >= 64)
+min_value = 64     # pedal pressed (value >= 64)
 keys = "space"
 
 # Channel-specific mapping (channel 2 only)
 # [[map]]
-# note = 60
+# note = "c4"
 # channel = 2
 # keys = "cmd+shift+c"

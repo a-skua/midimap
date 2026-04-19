@@ -2,7 +2,7 @@ mod config;
 mod keys;
 
 use clap::{Parser, Subcommand};
-use config::Config;
+use config::{parse_note, Config};
 use enigo::{Enigo, Key, Settings};
 use keys::{parse_combo, trigger_combo};
 use midir::{Ignore, MidiInput};
@@ -33,6 +33,7 @@ enum MidiEvent {
 
 struct Mapping {
     note: Option<u8>,
+    note_name: Option<String>,
     cc: Option<u8>,
     channel: Option<u8>,
     min_value: Option<u8>,
@@ -74,8 +75,13 @@ fn cmd_run(config_path: &str) -> Result<(), Box<dyn std::error::Error>> {
         .map(|m| {
             let keys = parse_combo(&m.keys)
                 .map_err(|e| format!("Invalid keys '{}': {}", m.keys, e))?;
+            let note = match &m.note {
+                Some(s) => Some(parse_note(s).map_err(|e| format!("Invalid note: {}", e))?),
+                None => None,
+            };
             Ok(Mapping {
-                note: m.note,
+                note,
+                note_name: m.note,
                 cc: m.cc,
                 channel: m.channel,
                 min_value: m.min_value,
@@ -155,7 +161,8 @@ fn cmd_run(config_path: &str) -> Result<(), Box<dyn std::error::Error>> {
                     if m.channel.is_some_and(|ch| ch != channel + 1) {
                         continue;
                     }
-                    println!("note {} → {}", note, m.key_str);
+                    let label = m.note_name.as_deref().unwrap_or("");
+                    println!("note {} ({}) → {}", label, note, m.key_str);
                     trigger_combo(&mut enigo, &m.keys);
                 }
             }
