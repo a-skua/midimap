@@ -57,7 +57,17 @@ keys = "space"
 note = "c4"
 channel = 2
 keys = "cmd+shift+c"
+
+# Literal text input (any Unicode; use `text` instead of `keys`)
+[[map]]
+note = "a4"
+text = "α"
 ```
+
+Each mapping must specify exactly one of `keys` or `text`.
+Use `keys` for shortcuts (modifiers + a key) and `text` for typing
+arbitrary Unicode strings — non-ASCII characters like `α`, `∀`, or
+`こんにちは` only work through `text`.
 
 ### Note name syntax
 

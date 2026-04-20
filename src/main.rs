@@ -3,7 +3,7 @@ mod keys;
 
 use clap::{Parser, Subcommand};
 use config::{parse_note, Config};
-use enigo::{Enigo, Key, Settings};
+use enigo::{Enigo, Key, Keyboard, Settings};
 use keys::{parse_combo, trigger_combo};
 use midir::{Ignore, MidiInput};
 use std::sync::mpsc;
@@ -31,14 +31,18 @@ enum MidiEvent {
     ControlChange { channel: u8, cc: u8, value: u8 },
 }
 
+enum Action {
+    Combo { label: String, keys: Vec<Key> },
+    Text(String),
+}
+
 struct Mapping {
     note: Option<u8>,
     note_name: Option<String>,
     cc: Option<u8>,
     channel: Option<u8>,
     min_value: Option<u8>,
-    key_str: String,
-    keys: Vec<Key>,
+    action: Action,
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -46,6 +50,22 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     match cli.command {
         Command::List => cmd_list(),
         Command::Run { config } => cmd_run(&config),
+    }
+}
+
+fn action_label(action: &Action) -> &str {
+    match action {
+        Action::Combo { label, .. } => label,
+        Action::Text(s) => s,
+    }
+}
+
+fn run_action(enigo: &mut Enigo, action: &Action) {
+    match action {
+        Action::Combo { keys, .. } => trigger_combo(enigo, keys),
+        Action::Text(s) => {
+            let _ = enigo.text(s);
+        }
     }
 }
 
@@ -73,8 +93,21 @@ fn cmd_run(config_path: &str) -> Result<(), Box<dyn std::error::Error>> {
         .mappings
         .into_iter()
         .map(|m| {
-            let keys =
-                parse_combo(&m.keys).map_err(|e| format!("Invalid keys '{}': {}", m.keys, e))?;
+            let action = match (m.keys, m.text) {
+                (Some(_), Some(_)) => {
+                    return Err("mapping must specify either 'keys' or 'text', not both".into())
+                }
+                (None, None) => return Err("mapping must specify 'keys' or 'text'".into()),
+                (Some(keys_str), None) => {
+                    let keys = parse_combo(&keys_str)
+                        .map_err(|e| format!("Invalid keys '{}': {}", keys_str, e))?;
+                    Action::Combo {
+                        label: keys_str,
+                        keys,
+                    }
+                }
+                (None, Some(text)) => Action::Text(text),
+            };
             let note = match &m.note {
                 Some(s) => Some(parse_note(s).map_err(|e| format!("Invalid note: {}", e))?),
                 None => None,
@@ -85,8 +118,7 @@ fn cmd_run(config_path: &str) -> Result<(), Box<dyn std::error::Error>> {
                 cc: m.cc,
                 channel: m.channel,
                 min_value: m.min_value,
-                key_str: m.keys,
-                keys,
+                action,
             })
         })
         .collect::<Result<_, String>>()?;
@@ -165,8 +197,8 @@ fn cmd_run(config_path: &str) -> Result<(), Box<dyn std::error::Error>> {
                         continue;
                     }
                     let label = m.note_name.as_deref().unwrap_or("");
-                    println!("note {} ({}) → {}", label, note, m.key_str);
-                    trigger_combo(&mut enigo, &m.keys);
+                    println!("note {} ({}) → {}", label, note, action_label(&m.action));
+                    run_action(&mut enigo, &m.action);
                 }
             }
             MidiEvent::ControlChange { channel, cc, value } => {
@@ -180,8 +212,8 @@ fn cmd_run(config_path: &str) -> Result<(), Box<dyn std::error::Error>> {
                     if m.min_value.is_some_and(|min| value < min) {
                         continue;
                     }
-                    println!("cc {}={} → {}", cc, value, m.key_str);
-                    trigger_combo(&mut enigo, &m.keys);
+                    println!("cc {}={} → {}", cc, value, action_label(&m.action));
+                    run_action(&mut enigo, &m.action);
                 }
             }
         }

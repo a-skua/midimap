@@ -27,6 +27,15 @@ cc = 64
 min_value = 64     # pedal pressed (value >= 64)
 keys = "space"
 
+# Literal text (any Unicode, including multi-character strings)
+[[map]]
+note = "a4"
+text = "α"
+
+[[map]]
+note = "ais4"
+text = "∀"
+
 # Channel-specific mapping (channel 2 only)
 # [[map]]
 # note = "c4"

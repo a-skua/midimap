@@ -18,7 +18,9 @@ pub struct MappingConfig {
     /// For CC: only trigger when value >= min_value
     pub min_value: Option<u8>,
     /// Key combo string, e.g. "cmd+c", "ctrl+shift+z", "f5"
-    pub keys: String,
+    pub keys: Option<String>,
+    /// Literal text to type (supports arbitrary Unicode, e.g. "α", "こんにちは")
+    pub text: Option<String>,
 }
 
 impl Config {
