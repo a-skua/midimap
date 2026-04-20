@@ -40,23 +40,23 @@ port = "Arturia"
 # Note On → key combo (LilyPond-style note names, scientific octave)
 [[map]]
 note = "c4"    # middle C (MIDI 60)
-keys = "cmd+c"
+keys = ["cmd", "c"]
 
 [[map]]
 note = "cis4"  # C#4
-keys = "cmd+v"
+keys = ["cmd", "v"]
 
 # CC → key (with optional value threshold)
 [[map]]
 cc = 64        # sustain pedal
 min_value = 64 # trigger on press only
-keys = "space"
+keys = ["space"]
 
 # Channel-specific (1–16; omit to match any channel)
 [[map]]
 note = "c4"
 channel = 2
-keys = "cmd+shift+c"
+keys = ["cmd", "shift", "c"]
 
 # Literal text input (any Unicode; use `text` instead of `keys`)
 [[map]]
@@ -71,7 +71,7 @@ sh = "say hello"
 
 Each mapping must specify exactly one of `keys`, `text`, or `sh`:
 
-- `keys` — key combo (modifiers + a key), e.g. `"cmd+c"`
+- `keys` — key combo as an array of modifiers plus a key, e.g. `["cmd", "c"]`
 - `text` — type literal text; supports arbitrary Unicode
   (`"α"`, `"∀"`, `"こんにちは"`). Non-ASCII characters only
   work through `text`, not `keys`.
@@ -94,7 +94,7 @@ scientific-pitch octave number (`c4` = middle C = MIDI 60).
 
 ### Key syntax
 
-Modifiers and keys are joined with `+`:
+`keys` is an array of tokens — modifiers first, then the main key:
 
 | Token                               | Key                    |
 | ----------------------------------- | ---------------------- |

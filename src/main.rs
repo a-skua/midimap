@@ -109,13 +109,11 @@ fn cmd_run(config_path: &str) -> Result<(), Box<dyn std::error::Error>> {
         .into_iter()
         .map(|m| {
             let action = match (m.keys, m.text, m.sh) {
-                (Some(keys_str), None, None) => {
-                    let keys = parse_combo(&keys_str)
-                        .map_err(|e| format!("Invalid keys '{}': {}", keys_str, e))?;
-                    Action::Combo {
-                        label: keys_str,
-                        keys,
-                    }
+                (Some(key_parts), None, None) => {
+                    let label = key_parts.join("+");
+                    let keys = parse_combo(&key_parts)
+                        .map_err(|e| format!("Invalid keys '{}': {}", label, e))?;
+                    Action::Combo { label, keys }
                 }
                 (None, Some(text), None) => Action::Text(text),
                 (None, None, Some(sh)) => Action::Shell(sh),

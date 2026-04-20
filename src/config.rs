@@ -17,8 +17,8 @@ pub struct MappingConfig {
     pub channel: Option<u8>,
     /// For CC: only trigger when value >= min_value
     pub min_value: Option<u8>,
-    /// Key combo string, e.g. "cmd+c", "ctrl+shift+z", "f5"
-    pub keys: Option<String>,
+    /// Key combo as an array, e.g. ["cmd", "c"], ["ctrl", "shift", "z"], ["f5"]
+    pub keys: Option<Vec<String>>,
     /// Literal text to type (supports arbitrary Unicode, e.g. "α", "こんにちは")
     pub text: Option<String>,
     /// Shell command to run, executed via `sh -c`

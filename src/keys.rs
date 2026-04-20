@@ -1,7 +1,10 @@
 use enigo::{Direction, Enigo, Key, Keyboard};
 
-pub fn parse_combo(s: &str) -> Result<Vec<Key>, String> {
-    s.split('+').map(|p| parse_key(p.trim())).collect()
+pub fn parse_combo(parts: &[String]) -> Result<Vec<Key>, String> {
+    if parts.is_empty() {
+        return Err("empty key combo".into());
+    }
+    parts.iter().map(|p| parse_key(p.trim())).collect()
 }
 
 fn parse_key(s: &str) -> Result<Key, String> {

@@ -7,25 +7,25 @@
 # (c4 = middle C = MIDI 60).
 [[map]]
 note = "c4"
-keys = "cmd+c"
+keys = ["cmd", "c"]
 
 [[map]]
 note = "cis4"      # C#4
-keys = "cmd+v"
+keys = ["cmd", "v"]
 
 [[map]]
 note = "d4"
-keys = "cmd+z"
+keys = ["cmd", "z"]
 
 [[map]]
 note = "e4"
-keys = "f5"
+keys = ["f5"]
 
 # CC mapping — sustain pedal (CC 64) triggers space
 [[map]]
 cc = 64
 min_value = 64     # pedal pressed (value >= 64)
-keys = "space"
+keys = ["space"]
 
 # Literal text (any Unicode, including multi-character strings)
 [[map]]
@@ -45,4 +45,4 @@ sh = "say hello"
 # [[map]]
 # note = "c4"
 # channel = 2
-# keys = "cmd+shift+c"
+# keys = ["cmd", "shift", "c"]
