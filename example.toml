@@ -36,6 +36,11 @@ text = "α"
 note = "ais4"
 text = "∀"
 
+# Shell command (run via `sh -c`, non-blocking)
+[[map]]
+note = "b4"
+sh = "say hello"
+
 # Channel-specific mapping (channel 2 only)
 # [[map]]
 # note = "c4"

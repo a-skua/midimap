@@ -6,7 +6,9 @@ use config::{parse_note, Config};
 use enigo::{Enigo, Key, Keyboard, Settings};
 use keys::{parse_combo, trigger_combo};
 use midir::{Ignore, MidiInput};
+use std::process::Command as ShellCommand;
 use std::sync::mpsc;
+use std::thread;
 
 #[derive(Parser)]
 #[command(name = "midimap", about = "Map MIDI events to keyboard shortcuts")]
@@ -34,6 +36,7 @@ enum MidiEvent {
 enum Action {
     Combo { label: String, keys: Vec<Key> },
     Text(String),
+    Shell(String),
 }
 
 struct Mapping {
@@ -56,7 +59,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 fn action_label(action: &Action) -> &str {
     match action {
         Action::Combo { label, .. } => label,
-        Action::Text(s) => s,
+        Action::Text(s) | Action::Shell(s) => s,
     }
 }
 
@@ -66,7 +69,19 @@ fn run_action(enigo: &mut Enigo, action: &Action) {
         Action::Text(s) => {
             let _ = enigo.text(s);
         }
+        Action::Shell(cmd) => spawn_shell(cmd.clone()),
     }
+}
+
+fn spawn_shell(cmd: String) {
+    thread::spawn(
+        move || match ShellCommand::new("sh").arg("-c").arg(&cmd).spawn() {
+            Ok(mut child) => {
+                let _ = child.wait();
+            }
+            Err(e) => eprintln!("failed to spawn '{}': {}", cmd, e),
+        },
+    );
 }
 
 fn cmd_list() -> Result<(), Box<dyn std::error::Error>> {
@@ -93,12 +108,8 @@ fn cmd_run(config_path: &str) -> Result<(), Box<dyn std::error::Error>> {
         .mappings
         .into_iter()
         .map(|m| {
-            let action = match (m.keys, m.text) {
-                (Some(_), Some(_)) => {
-                    return Err("mapping must specify either 'keys' or 'text', not both".into())
-                }
-                (None, None) => return Err("mapping must specify 'keys' or 'text'".into()),
-                (Some(keys_str), None) => {
+            let action = match (m.keys, m.text, m.sh) {
+                (Some(keys_str), None, None) => {
                     let keys = parse_combo(&keys_str)
                         .map_err(|e| format!("Invalid keys '{}': {}", keys_str, e))?;
                     Action::Combo {
@@ -106,7 +117,16 @@ fn cmd_run(config_path: &str) -> Result<(), Box<dyn std::error::Error>> {
                         keys,
                     }
                 }
-                (None, Some(text)) => Action::Text(text),
+                (None, Some(text), None) => Action::Text(text),
+                (None, None, Some(sh)) => Action::Shell(sh),
+                (None, None, None) => {
+                    return Err("mapping must specify 'keys', 'text', or 'sh'".into())
+                }
+                _ => {
+                    return Err(
+                        "mapping must specify exactly one of 'keys', 'text', or 'sh'".into(),
+                    )
+                }
             };
             let note = match &m.note {
                 Some(s) => Some(parse_note(s).map_err(|e| format!("Invalid note: {}", e))?),

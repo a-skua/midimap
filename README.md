@@ -62,12 +62,21 @@ keys = "cmd+shift+c"
 [[map]]
 note = "a4"
 text = "α"
+
+# Shell command (executed via `sh -c`, non-blocking)
+[[map]]
+note = "b4"
+sh = "say hello"
 ```
 
-Each mapping must specify exactly one of `keys` or `text`.
-Use `keys` for shortcuts (modifiers + a key) and `text` for typing
-arbitrary Unicode strings — non-ASCII characters like `α`, `∀`, or
-`こんにちは` only work through `text`.
+Each mapping must specify exactly one of `keys`, `text`, or `sh`:
+
+- `keys` — key combo (modifiers + a key), e.g. `"cmd+c"`
+- `text` — type literal text; supports arbitrary Unicode
+  (`"α"`, `"∀"`, `"こんにちは"`). Non-ASCII characters only
+  work through `text`, not `keys`.
+- `sh` — run a shell command via `sh -c`. Spawned on a background
+  thread so the MIDI loop stays responsive.
 
 ### Note name syntax
 

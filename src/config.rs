@@ -21,6 +21,8 @@ pub struct MappingConfig {
     pub keys: Option<String>,
     /// Literal text to type (supports arbitrary Unicode, e.g. "α", "こんにちは")
     pub text: Option<String>,
+    /// Shell command to run, executed via `sh -c`
+    pub sh: Option<String>,
 }
 
 impl Config {
