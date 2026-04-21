@@ -25,6 +25,9 @@ enum Command {
     Run {
         #[arg(default_value = "midimap.toml")]
         config: String,
+        /// Print debug information for each triggered event
+        #[arg(short, long)]
+        debug: bool,
     },
 }
 
@@ -52,14 +55,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let cli = Cli::parse();
     match cli.command {
         Command::List => cmd_list(),
-        Command::Run { config } => cmd_run(&config),
+        Command::Run { config, debug } => cmd_run(&config, debug),
     }
 }
 
-fn action_label(action: &Action) -> &str {
+fn action_label(action: &Action) -> String {
     match action {
-        Action::Combo { label, .. } => label,
-        Action::Text(s) | Action::Shell(s) => s,
+        Action::Combo { label, .. } => format!("Keys({})", label),
+        Action::Text(s) => format!("Text({})", s),
+        Action::Shell(s) => format!("Shell({})", s),
     }
 }
 
@@ -100,7 +104,7 @@ fn cmd_list() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-fn cmd_run(config_path: &str) -> Result<(), Box<dyn std::error::Error>> {
+fn cmd_run(config_path: &str, debug: bool) -> Result<(), Box<dyn std::error::Error>> {
     let config = Config::load(config_path)?;
     let port_filter = config.port;
 
@@ -214,8 +218,10 @@ fn cmd_run(config_path: &str) -> Result<(), Box<dyn std::error::Error>> {
                     if m.channel.is_some_and(|ch| ch != channel + 1) {
                         continue;
                     }
-                    let label = m.note_name.as_deref().unwrap_or("");
-                    println!("note {} ({}) → {}", label, note, action_label(&m.action));
+                    if debug {
+                        let label = m.note_name.as_deref().unwrap_or("");
+                        println!("note {} ({}) → {}", label, note, action_label(&m.action));
+                    }
                     run_action(&mut enigo, &m.action);
                 }
             }
@@ -230,7 +236,9 @@ fn cmd_run(config_path: &str) -> Result<(), Box<dyn std::error::Error>> {
                     if m.min_value.is_some_and(|min| value < min) {
                         continue;
                     }
-                    println!("cc {}={} → {}", cc, value, action_label(&m.action));
+                    if debug {
+                        println!("cc {}={} → {}", cc, value, action_label(&m.action));
+                    }
                     run_action(&mut enigo, &m.action);
                 }
             }
