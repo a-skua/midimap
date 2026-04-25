@@ -18,8 +18,8 @@ enum Command {
     List,
     /// Run the MIDI mapper with a config file
     Run {
-        #[arg(default_value = "midimap.toml")]
-        config: String,
+        /// Config file path. If omitted, looks up ./midimap.toml then ~/.config/midimap/config.toml
+        config: Option<String>,
         /// Print debug information for each triggered event
         #[arg(short, long)]
         debug: bool,
@@ -30,6 +30,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let cli = Cli::parse();
     match cli.command {
         Command::List => command::cmd_list(),
-        Command::Run { config, debug } => command::cmd_run(&config, debug),
+        Command::Run { config, debug } => command::cmd_run(config.as_deref(), debug),
     }
 }

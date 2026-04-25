@@ -1,5 +1,6 @@
 use serde::Deserialize;
 use std::fs;
+use std::path::{Path, PathBuf};
 
 use crate::action::Action;
 use crate::keys::parse_combo;
@@ -38,12 +39,31 @@ pub struct Mapping {
 }
 
 impl Config {
-    pub fn load(path: &str) -> Result<Self, Box<dyn std::error::Error>> {
-        let content =
-            fs::read_to_string(path).map_err(|e| format!("Cannot read '{}': {}", path, e))?;
+    pub fn load(path: &Path) -> Result<Self, Box<dyn std::error::Error>> {
+        let content = fs::read_to_string(path)
+            .map_err(|e| format!("Cannot read '{}': {}", path.display(), e))?;
         let config: Config =
             toml::from_str(&content).map_err(|e| format!("Invalid config: {}", e))?;
         Ok(config)
+    }
+
+    /// Resolve the config file path. If `explicit` is provided, use it as-is.
+    /// Otherwise look up `./midimap.toml`, then `~/.config/midimap/config.toml`.
+    pub fn resolve_path(explicit: Option<&str>) -> Result<PathBuf, String> {
+        if let Some(p) = explicit {
+            return Ok(PathBuf::from(p));
+        }
+        let cwd = PathBuf::from("midimap.toml");
+        if cwd.is_file() {
+            return Ok(cwd);
+        }
+        if let Ok(home) = std::env::var("HOME") {
+            let xdg = PathBuf::from(home).join(".config/midimap/config.toml");
+            if xdg.is_file() {
+                return Ok(xdg);
+            }
+        }
+        Err("No config file found (tried ./midimap.toml and ~/.config/midimap/config.toml)".into())
     }
 }
 
@@ -59,11 +79,7 @@ impl MappingConfig {
             (None, Some(text), None) => Action::Text(text),
             (None, None, Some(sh)) => Action::Shell(sh),
             (None, None, None) => return Err("mapping must specify 'keys', 'text', or 'sh'".into()),
-            _ => {
-                return Err(
-                    "mapping must specify exactly one of 'keys', 'text', or 'sh'".into(),
-                )
-            }
+            _ => return Err("mapping must specify exactly one of 'keys', 'text', or 'sh'".into()),
         };
         let note = match &self.note {
             Some(s) => Some(parse_note(s).map_err(|e| format!("Invalid note: {}", e))?),

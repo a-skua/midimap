@@ -25,8 +25,10 @@ pub fn cmd_list() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-pub fn cmd_run(config_path: &str, debug: bool) -> Result<(), Box<dyn std::error::Error>> {
-    let config = Config::load(config_path)?;
+pub fn cmd_run(config_path: Option<&str>, debug: bool) -> Result<(), Box<dyn std::error::Error>> {
+    let path = Config::resolve_path(config_path)?;
+    println!("Using config: {}", path.display());
+    let config = Config::load(&path)?;
     let port_filter = config.port;
 
     let mappings: Vec<Mapping> = config
