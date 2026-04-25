@@ -19,6 +19,14 @@ rewritten in Rust with active dependencies.
 
 ## Install
 
+### From [crates.io](https://crates.io/crates/midimap)
+
+Requires Rust (install via [rustup](https://rustup.rs)).
+
+```bash
+cargo install midimap
+```
+
 ### Prebuilt binaries
 
 Download from [Releases](https://github.com/a-skua/midimap/releases).
@@ -29,9 +37,9 @@ Builds are provided for:
 
 ### From source
 
-Requires Rust (install via [rustup](https://rustup.rs)).
-
 ```bash
+git clone https://github.com/a-skua/midimap
+cd midimap
 cargo install --path .
 ```
 
