@@ -2,6 +2,18 @@
 name = "midimap"
 version = "2026.4.25"
 edition = "2024"
+description = "Map MIDI events (notes, CC) to keyboard shortcuts on macOS and Linux."
+license = "MIT"
+repository = "https://github.com/a-skua/midimap"
+homepage = "https://github.com/a-skua/midimap"
+readme = "README.md"
+keywords = ["midi", "cli", "keymap", "keyboard", "shortcut"]
+categories = ["command-line-utilities"]
+exclude = [
+    "midimap.toml",
+    "target",
+    ".github",
+]
 
 [[bin]]
 name = "midimap"
