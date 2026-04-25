@@ -1,7 +1,7 @@
 [package]
 name = "midimap"
-version = "0.1.0"
-edition = "2021"
+version = "2026.4.25"
+edition = "2024"
 
 [[bin]]
 name = "midimap"

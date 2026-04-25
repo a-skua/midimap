@@ -9,7 +9,7 @@ use midir::{Ignore, MidiInput};
 use std::sync::mpsc;
 
 #[derive(Parser)]
-#[command(name = "midimap", about = "Map MIDI events to keyboard shortcuts")]
+#[command(version, about = "Map MIDI events to keyboard shortcuts")]
 struct Cli {
     #[command(subcommand)]
     command: Command,

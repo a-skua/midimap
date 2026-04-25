@@ -344,7 +344,7 @@ dependencies = [
 
 [[package]]
 name = "midimap"
-version = "0.1.0"
+version = "2026.4.25"
 dependencies = [
  "clap",
  "enigo",
