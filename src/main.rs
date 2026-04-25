@@ -1,14 +1,12 @@
+mod action;
 mod config;
 mod keys;
 
 use clap::{Parser, Subcommand};
-use config::{parse_note, Config};
-use enigo::{Enigo, Key, Keyboard, Settings};
-use keys::{parse_combo, trigger_combo};
+use config::{Config, Mapping};
+use enigo::{Enigo, Settings};
 use midir::{Ignore, MidiInput};
-use std::process::Command as ShellCommand;
 use std::sync::mpsc;
-use std::thread;
 
 #[derive(Parser)]
 #[command(name = "midimap", about = "Map MIDI events to keyboard shortcuts")]
@@ -36,56 +34,12 @@ enum MidiEvent {
     ControlChange { channel: u8, cc: u8, value: u8 },
 }
 
-enum Action {
-    Combo { label: String, keys: Vec<Key> },
-    Text(String),
-    Shell(String),
-}
-
-struct Mapping {
-    note: Option<u8>,
-    note_name: Option<String>,
-    cc: Option<u8>,
-    channel: Option<u8>,
-    min_value: Option<u8>,
-    action: Action,
-}
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let cli = Cli::parse();
     match cli.command {
         Command::List => cmd_list(),
         Command::Run { config, debug } => cmd_run(&config, debug),
     }
-}
-
-fn action_label(action: &Action) -> String {
-    match action {
-        Action::Combo { label, .. } => format!("Keys({})", label),
-        Action::Text(s) => format!("Text({})", s),
-        Action::Shell(s) => format!("Shell({})", s),
-    }
-}
-
-fn run_action(enigo: &mut Enigo, action: &Action) {
-    match action {
-        Action::Combo { keys, .. } => trigger_combo(enigo, keys),
-        Action::Text(s) => {
-            let _ = enigo.text(s);
-        }
-        Action::Shell(cmd) => spawn_shell(cmd.clone()),
-    }
-}
-
-fn spawn_shell(cmd: String) {
-    thread::spawn(
-        move || match ShellCommand::new("sh").arg("-c").arg(&cmd).spawn() {
-            Ok(mut child) => {
-                let _ = child.wait();
-            }
-            Err(e) => eprintln!("failed to spawn '{}': {}", cmd, e),
-        },
-    );
 }
 
 fn cmd_list() -> Result<(), Box<dyn std::error::Error>> {
@@ -111,38 +65,7 @@ fn cmd_run(config_path: &str, debug: bool) -> Result<(), Box<dyn std::error::Err
     let mappings: Vec<Mapping> = config
         .mappings
         .into_iter()
-        .map(|m| {
-            let action = match (m.keys, m.text, m.sh) {
-                (Some(key_parts), None, None) => {
-                    let label = key_parts.join("+");
-                    let keys = parse_combo(&key_parts)
-                        .map_err(|e| format!("Invalid keys '{}': {}", label, e))?;
-                    Action::Combo { label, keys }
-                }
-                (None, Some(text), None) => Action::Text(text),
-                (None, None, Some(sh)) => Action::Shell(sh),
-                (None, None, None) => {
-                    return Err("mapping must specify 'keys', 'text', or 'sh'".into())
-                }
-                _ => {
-                    return Err(
-                        "mapping must specify exactly one of 'keys', 'text', or 'sh'".into(),
-                    )
-                }
-            };
-            let note = match &m.note {
-                Some(s) => Some(parse_note(s).map_err(|e| format!("Invalid note: {}", e))?),
-                None => None,
-            };
-            Ok(Mapping {
-                note,
-                note_name: m.note,
-                cc: m.cc,
-                channel: m.channel,
-                min_value: m.min_value,
-                action,
-            })
-        })
+        .map(|m| m.resolve())
         .collect::<Result<_, String>>()?;
 
     let mut midi_in = MidiInput::new("midimap")?;
@@ -220,9 +143,9 @@ fn cmd_run(config_path: &str, debug: bool) -> Result<(), Box<dyn std::error::Err
                     }
                     if debug {
                         let label = m.note_name.as_deref().unwrap_or("");
-                        println!("note {} ({}) → {}", label, note, action_label(&m.action));
+                        println!("note {} ({}) → {}", label, note, m.action.label());
                     }
-                    run_action(&mut enigo, &m.action);
+                    m.action.run(&mut enigo);
                 }
             }
             MidiEvent::ControlChange { channel, cc, value } => {
@@ -237,9 +160,9 @@ fn cmd_run(config_path: &str, debug: bool) -> Result<(), Box<dyn std::error::Err
                         continue;
                     }
                     if debug {
-                        println!("cc {}={} → {}", cc, value, action_label(&m.action));
+                        println!("cc {}={} → {}", cc, value, m.action.label());
                     }
-                    run_action(&mut enigo, &m.action);
+                    m.action.run(&mut enigo);
                 }
             }
         }

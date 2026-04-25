@@ -1,6 +1,9 @@
 use serde::Deserialize;
 use std::fs;
 
+use crate::action::Action;
+use crate::keys::parse_combo;
+
 #[derive(Debug, Deserialize)]
 pub struct Config {
     pub port: Option<String>,
@@ -25,6 +28,15 @@ pub struct MappingConfig {
     pub sh: Option<String>,
 }
 
+pub struct Mapping {
+    pub note: Option<u8>,
+    pub note_name: Option<String>,
+    pub cc: Option<u8>,
+    pub channel: Option<u8>,
+    pub min_value: Option<u8>,
+    pub action: Action,
+}
+
 impl Config {
     pub fn load(path: &str) -> Result<Self, Box<dyn std::error::Error>> {
         let content =
@@ -32,6 +44,39 @@ impl Config {
         let config: Config =
             toml::from_str(&content).map_err(|e| format!("Invalid config: {}", e))?;
         Ok(config)
+    }
+}
+
+impl MappingConfig {
+    pub fn resolve(self) -> Result<Mapping, String> {
+        let action = match (self.keys, self.text, self.sh) {
+            (Some(key_parts), None, None) => {
+                let label = key_parts.join("+");
+                let keys = parse_combo(&key_parts)
+                    .map_err(|e| format!("Invalid keys '{}': {}", label, e))?;
+                Action::Combo { label, keys }
+            }
+            (None, Some(text), None) => Action::Text(text),
+            (None, None, Some(sh)) => Action::Shell(sh),
+            (None, None, None) => return Err("mapping must specify 'keys', 'text', or 'sh'".into()),
+            _ => {
+                return Err(
+                    "mapping must specify exactly one of 'keys', 'text', or 'sh'".into(),
+                )
+            }
+        };
+        let note = match &self.note {
+            Some(s) => Some(parse_note(s).map_err(|e| format!("Invalid note: {}", e))?),
+            None => None,
+        };
+        Ok(Mapping {
+            note,
+            note_name: self.note,
+            cc: self.cc,
+            channel: self.channel,
+            min_value: self.min_value,
+            action,
+        })
     }
 }
 
