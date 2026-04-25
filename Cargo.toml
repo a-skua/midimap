@@ -1,6 +1,6 @@
 [package]
 name = "midimap"
-version = "2026.4.25"
+version = "2026.4.26"
 edition = "2024"
 description = "Map MIDI events (notes, CC) to keyboard shortcuts on macOS and Linux."
 license = "MIT"

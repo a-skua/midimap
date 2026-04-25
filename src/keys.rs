@@ -39,9 +39,34 @@ fn parse_key(s: &str) -> Result<Key, String> {
         "f10" => Ok(Key::F10),
         "f11" => Ok(Key::F11),
         "f12" => Ok(Key::F12),
-        s if s.chars().count() == 1 => Ok(Key::Unicode(s.chars().next().unwrap())),
+        s if s.chars().count() == 1 => Ok(char_to_key(s.chars().next().unwrap())),
         s => Err(format!("Unknown key: '{}'", s)),
     }
+}
+
+/// On macOS, digits are sent via virtual keycode rather than `Key::Unicode`,
+/// because under a held Shift the Unicode path emits the shifted glyph (e.g.
+/// `4` → `$`) which bypasses system shortcut handlers like cmd+shift+4.
+#[cfg(target_os = "macos")]
+fn char_to_key(c: char) -> Key {
+    match c {
+        '0' => Key::Other(0x1D),
+        '1' => Key::Other(0x12),
+        '2' => Key::Other(0x13),
+        '3' => Key::Other(0x14),
+        '4' => Key::Other(0x15),
+        '5' => Key::Other(0x17),
+        '6' => Key::Other(0x16),
+        '7' => Key::Other(0x1A),
+        '8' => Key::Other(0x1C),
+        '9' => Key::Other(0x19),
+        _ => Key::Unicode(c),
+    }
+}
+
+#[cfg(not(target_os = "macos"))]
+fn char_to_key(c: char) -> Key {
+    Key::Unicode(c)
 }
 
 pub fn trigger_combo(enigo: &mut Enigo, keys: &[Key]) {
