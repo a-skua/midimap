@@ -37,6 +37,7 @@ note = "ais4"
 text = "∀"
 
 # Shell command (run via `sh -c`, non-blocking)
+# `say` is macOS-only; on Linux try e.g. `notify-send hello`.
 [[map]]
 note = "b4"
 sh = "say hello"

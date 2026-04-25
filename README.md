@@ -1,18 +1,35 @@
 # midimap
 
-Map MIDI events (notes, CC) to keyboard shortcuts on macOS.
+Map MIDI events (notes, CC) to keyboard shortcuts on macOS and Linux.
 
 Inspired by [midistroke](https://github.com/charlieroberts/midiStroke/),
 rewritten in Rust with active dependencies.
 
 ## Requirements
 
-- macOS
-- Rust (install via [rustup](https://rustup.rs))
-- **Accessibility permission** — System Settings → Privacy & Security →
-  Accessibility → enable your terminal or the midimap binary
+- macOS or Linux (X11; Wayland is not supported by the underlying input library)
+- Platform setup:
+  - **macOS**: grant **Accessibility permission** — System Settings →
+    Privacy & Security → Accessibility → enable your terminal or the
+    midimap binary
+  - **Linux (Debian/Ubuntu)**: install ALSA and libxdo dev headers
+    ```bash
+    sudo apt-get install libasound2-dev libxdo-dev
+    ```
 
 ## Install
+
+### Prebuilt binaries
+
+Download from [Releases](https://github.com/a-skua/midimap/releases).
+Builds are provided for:
+
+- macOS (arm64)
+- Linux (amd64, arm64)
+
+### From source
+
+Requires Rust (install via [rustup](https://rustup.rs)).
 
 ```bash
 cargo install --path .
@@ -24,10 +41,19 @@ cargo install --path .
 # List available MIDI input ports
 midimap list
 
-# Run with a config file (default: midimap.toml)
-midimap run
-midimap run path/to/config.toml
+# Run with a config file
+midimap run                       # ./midimap.toml → ~/.config/midimap/config.toml
+midimap run path/to/config.toml   # explicit path
+
+# Print each triggered event (note/cc → action) for debugging
+midimap run --debug
 ```
+
+The config file is resolved in this order:
+
+1. The path passed on the command line (if any)
+2. `./midimap.toml` (current directory)
+3. `~/.config/midimap/config.toml`
 
 ## Configuration
 
@@ -66,7 +92,7 @@ text = "α"
 # Shell command (executed via `sh -c`, non-blocking)
 [[map]]
 note = "b4"
-sh = "say hello"
+sh = "say hello"      # macOS; on Linux try e.g. `notify-send hello`
 ```
 
 Each mapping must specify exactly one of `keys`, `text`, or `sh`:

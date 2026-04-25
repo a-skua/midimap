@@ -1,2 +1,5 @@
 /target
-midimap.toml
+*.toml
+!Cargo.toml
+!Cargo.lock
+!example.toml
